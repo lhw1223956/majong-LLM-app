@@ -528,7 +528,7 @@ def render_main_ui(mode):
 
     #  🔹  🌟 修改 4：全新「麻將助手」介面 🌟  🔹
     elif mode == "麻將助手":
-        st.write(f" 🐹  您的手牌 (暗牌)：")
+        st.write(f" 🐹  手牌：")
         codes = st.session_state.con_manual
         s_idx = sorted(range(len(codes)), key=lambda k: TILE_INFO[codes[k]]['w'])
         cols = st.columns(11)
@@ -548,7 +548,7 @@ def render_main_ui(mode):
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-        st.write(f" 🐥  已吃碰牌 (明牌)：")
+        st.write(f" 🐥  門前牌：")
         codes = st.session_state.exp_manual
         s_idx = sorted(range(len(codes)), key=lambda k: TILE_INFO[codes[k]]['w'])
         cols = st.columns(11)
@@ -588,6 +588,7 @@ if not cam and not up:
 
 # 渲染主介面
 render_main_ui(app_mode)
+
 
 
 
