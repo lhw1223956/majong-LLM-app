@@ -58,7 +58,7 @@ elif app_mode == "聽牌分析":
     st.sidebar.info("本工具進行聽牌分析，請確保手牌符合3n+1 張的聽牌規範。")
     flower_mode, dice_val = None, 0
 else:
-    st.sidebar.info("🤖 助手模式：請拍攝您的手牌與已吃碰的門前牌，AI 教練將為您分析最佳捨牌策略。")
+    st.sidebar.info("助手模式：請拍攝您的手牌與已吃碰的門前牌，AI 教練將為您分析最佳捨牌策略。")
     flower_mode, dice_val = None, 0
 
 @st.cache_resource
@@ -351,8 +351,8 @@ def process_detection(image_obj, source_type, current_model_name, mode):
             st.session_state.con_manual = [d['code'] for d in tile_data]
             st.session_state.exp_manual = []
 
-# --- 🌟 修改 3：全面升級的 LLM 教練模組 (支援新舊模式切換) 🌟 ---
-def get_majiang_coach_advice(hand_codes, exp_codes, mode, waiting_tiles=None):
+# --- 🌟 LLM 智慧教練模組 (專屬麻將助手) 🌟 ---
+def get_majiang_coach_advice(hand_codes, exp_codes):
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)
@@ -362,43 +362,26 @@ def get_majiang_coach_advice(hand_codes, exp_codes, mode, waiting_tiles=None):
         return f"⚠️ 系統錯誤：{e}"
 
     try:
-        # 已更新為 2.5 flash 模型
+        # 使用 2.5 flash 模型
         llm_model = genai.GenerativeModel('gemini-2.5-flash')
         hand_names = [TILE_INFO[c]['name'] for c in hand_codes if c in TILE_INFO]
         exp_names = [TILE_INFO[c]['name'] for c in exp_codes if c in TILE_INFO]
         
-        # 根據不同模式使用不同的 Prompt
-        if mode == "麻將助手":
-            prompt = f"""
-            你現在是一位精通「台灣 16 張麻將規則」的職業教練。
-            請注意，這代表的是「遊戲規則背景」，玩家目前手上的暗牌不一定剛好是 16 張，因為可能已經有吃、碰、槓。
-            
-            目前系統偵測到玩家的牌局狀態：
-            - 尚未打出的暗牌 (手牌)：{', '.join(hand_names) if hand_names else '無'}
-            - 已經吃碰露出的明牌：{', '.join(exp_names) if exp_names else '無'}
-            
-            任務需求：
-            請仔細分析上述暗牌的「搭子」與「孤張」結構。
-            提供 150 字以內的戰術建議，明確告訴玩家：
-            1. 目前「最建議打掉哪一張暗牌」？
-            2. 為什麼？ (例如：它是孤張、卡死其他搭子，或是為了湊某種台數牌型)。
-            請用鼓勵且專業的在地口吻回答，並多使用台灣麻將術語。
-            """
-        else:
-            # 聽牌分析模式使用的 Prompt
-            wait_names = [TILE_INFO[c]['name'] for t in waiting_tiles if (c := t) in TILE_INFO] if waiting_tiles else []
-            prompt = f"""
-            你現在是一位台灣16張麻將的職業教練。
-            目前模式：{mode}
-            玩家手牌：{', '.join(hand_names)}
-            演算法計算出的聽牌：{', '.join(wait_names) if wait_names else '尚未聽牌'}
-            
-            請針對目前的牌局提供 150 字以內的專業建議。
-            如果已經聽牌，請分析這幾張聽牌的優劣；
-            如果尚未聽牌，請建議打掉哪一張牌最有機會轉為大牌（如平胡、湊對子或字一色）。
-            請用鼓勵且專業的在地口吻回答，並多使用台灣麻將術語。
-            """
-            
+        prompt = f"""
+        你現在是一位精通「台灣 16 張麻將規則」的職業教練。
+        請注意，這代表的是「遊戲規則背景」，玩家目前手上的暗牌不一定剛好是 16 張，因為可能已經有吃、碰、槓。
+        
+        目前系統偵測到玩家的牌局狀態：
+        - 尚未打出的暗牌 (手牌)：{', '.join(hand_names) if hand_names else '無'}
+        - 已經吃碰露出的明牌：{', '.join(exp_names) if exp_names else '無'}
+        
+        任務需求：
+        請仔細分析上述暗牌的「搭子」與「孤張」結構。
+        提供 150 字以內的戰術建議，明確告訴玩家：
+        1. 目前「最建議打掉哪一張暗牌」？
+        2. 為什麼？ (例如：它是孤張、卡死其他搭子，或是為了湊某種台數牌型)。
+        請用鼓勵且專業的在地口吻回答，並多使用台灣麻將術語。
+        """
         response = llm_model.generate_content(prompt)
         return response.text
     except Exception as e:
@@ -541,14 +524,7 @@ def render_main_ui(mode):
         st.write("")
         if st.button("  🔄   重新分析", key="refresh_all", use_container_width=True, type="primary"): st.rerun()
 
-        st.markdown("---")
-        st.markdown('<div class="section-header"> 🤖 聽牌戰術室 </div>', unsafe_allow_html=True)
-        if st.button("✨ 聽牌優劣分析", use_container_width=True, type="primary", key="coach_btn_wait"):
-            with st.spinner("教練正在看牌與分析中..."):
-                hand_only = [c for c in st.session_state.con_manual if TILE_INFO.get(c, {}).get('type') != 'h']
-                waiting_tiles = get_waiting_tiles(hand_only)
-                advice = get_majiang_coach_advice(st.session_state.con_manual, [], mode, waiting_tiles)
-                st.chat_message("assistant").write(advice)
+   
 
     #  🔹  🌟 修改 4：全新「麻將助手」介面 🌟  🔹
     elif mode == "麻將助手":
@@ -587,11 +563,11 @@ def render_main_ui(mode):
                 if st.button(v['icon'], key=f"ast_add_d_{k}", disabled=(counts_all[k] >= limit)): st.session_state.exp_manual.append(k); st.rerun()
 
         st.markdown("---")
-        st.markdown('<div class="section-header"> 💡 實戰指導室 </div>', unsafe_allow_html=True)
-        if st.button("✨ 獲取下一步捨牌建議", use_container_width=True, type="primary", key="btn_ast"):
+        st.markdown('<div class="section-header"> 🤖  AI教練指導 </div>', unsafe_allow_html=True)
+        if st.button("💡 獲取下一步捨牌建議", use_container_width=True, type="primary", key="btn_ast"):
             with st.spinner("教練正在分析最佳打法..."):
-                # 將暗牌與明牌同時傳給 LLM 進行綜合戰略分析
-                advice = get_majiang_coach_advice(st.session_state.con_manual, st.session_state.exp_manual, mode)
+                # ✅ 修改這裡：移除 mode 參數，只傳手牌和門前牌
+                advice = get_majiang_coach_advice(st.session_state.con_manual, st.session_state.exp_manual)
                 st.chat_message("assistant").write(advice)
 
 # --- 5. 啟動入口與快取清空 ---
@@ -612,6 +588,7 @@ if not cam and not up:
 
 # 渲染主介面
 render_main_ui(app_mode)
+
 
 
 
