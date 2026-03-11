@@ -512,7 +512,7 @@ def render_main_ui(mode):
 
     # --- 🌟 新增：LLM 教練分析按鈕區塊 🌟 ---
     st.markdown("---")
-    st.markdown('<div class="section-header"> 🔮 AI 智慧教練建議 </div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> 🧐 AI 智慧教練建議 </div>', unsafe_allow_html=True)
     if st.button("✨ 獲取教練戰術分析", use_container_width=True, type="primary", key="coach_btn"):
         with st.spinner("教練正在看牌與分析中..."):
             hand_only = [c for c in st.session_state.con_manual if TILE_INFO.get(c, {}).get('type') != 'h']
@@ -538,6 +538,7 @@ if not cam and not up:
 
 # 渲染主介面
 render_main_ui(app_mode)
+
 
 
 
