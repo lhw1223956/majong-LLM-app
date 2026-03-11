@@ -42,7 +42,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title(" 🀄️  AI麻將計算平台")
+st.title(" 🀄️  自動麻將系統")
 
 # --- 1. 核心設定區 ---
 st.sidebar.title(" ⚙️  核心設定")
@@ -58,7 +58,7 @@ elif app_mode == "聽牌分析":
     st.sidebar.info("本工具進行聽牌分析，請確保手牌符合3n+1 張的聽牌規範。")
     flower_mode, dice_val = None, 0
 else:
-    st.sidebar.info("助手模式：請拍攝您的手牌與已吃碰的門前牌，AI 教練將為您分析最佳捨牌策略。")
+    st.sidebar.info("請拍攝您的手牌與已吃碰的門前牌，AI 教練將為您分析最佳捨牌策略。")
     flower_mode, dice_val = None, 0
 
 @st.cache_resource
@@ -563,7 +563,7 @@ def render_main_ui(mode):
                 if st.button(v['icon'], key=f"ast_add_d_{k}", disabled=(counts_all[k] >= limit)): st.session_state.exp_manual.append(k); st.rerun()
 
         st.markdown("---")
-        st.markdown('<div class="section-header"> 🤖  AI教練指導 </div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"> 🌟 AI教練指導 </div>', unsafe_allow_html=True)
         if st.button("💡 獲取下一步捨牌建議", use_container_width=True, type="primary", key="btn_ast"):
             with st.spinner("教練正在分析最佳打法..."):
                 # ✅ 修改這裡：移除 mode 參數，只傳手牌和門前牌
@@ -588,6 +588,7 @@ if not cam and not up:
 
 # 渲染主介面
 render_main_ui(app_mode)
+
 
 
 
