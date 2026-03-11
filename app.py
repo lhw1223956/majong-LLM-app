@@ -47,7 +47,7 @@ st.title("🀄️ AI麻將計算平台")
 # --- 1. 核心設定區 ---
 st.sidebar.title("⚙️ 核心設定")
 app_mode = st.sidebar.radio("📌 功能選擇", ["台數計算", "聽牌分析"])
-model_choice = st.sidebar.selectbox("辨識模型", ("yolov8s(2).pt", "yolov8n(2).pt", "YOLOv8s_obb.pt", "YOLOv8n_obb.pt"))
+model_choice = st.sidebar.selectbox("辨識模型", ("yolov8s.pt", "yolov8n.pt", "YOLOv8s_obb.pt", "YOLOv8n_obb.pt"))
 
 if app_mode == "台數計算":
     flower_mode = st.sidebar.radio("花牌玩法", ["莊家花 (莊家為東)", "開門花 (骰子開門處為東)"])
@@ -529,6 +529,7 @@ if not cam and not up:
             del st.session_state[key]
 
 render_main_ui(app_mode)
+
 
 
 
