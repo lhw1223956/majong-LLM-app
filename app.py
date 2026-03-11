@@ -352,7 +352,7 @@ def get_majiang_coach_advice(hand_codes, waiting_tiles, mode):
         return f"⚠️ 系統錯誤：{e}"
 
     try:
-        llm_model = genai.GenerativeModel('gemini-1.5-flash')
+        llm_model = genai.GenerativeModel('gemini-2.5-flash')
         hand_names = [TILE_INFO[c]['name'] for c in hand_codes if c in TILE_INFO]
         wait_names = [TILE_INFO[c]['name'] for t in waiting_tiles if (c := t) in TILE_INFO]
         
@@ -538,6 +538,7 @@ if not cam and not up:
 
 # 渲染主介面
 render_main_ui(app_mode)
+
 
 
 
